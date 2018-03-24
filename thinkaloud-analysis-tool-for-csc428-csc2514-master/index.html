@@ -12,14 +12,18 @@
           <div class="col-md-5 side-panel">
             <div class="participant-selection">
               <h2>Select Data Files</h2>
-              <form class="form-inline">
+              <class="form-inline">
                 <label class="sel_label" for="participant_sel">Select participant:</label>
                 <select class="form-control sel_form" id="participant_sel"></select>
                 <label class="sel_label" for="task_sel">Select task:</label>
                 <select class="form-control sel_form" id="task_sel"></select>
+                <span class="label">Age: </span>
+                <input type="text" class="form-control" id="age" size="4">
+                <span class="label">Gender: </span>
+                <input type="text" class="form-control" id="gender" size="4">
                 <a class="btn btn-warning" id="confirmFiles">Confirm</a>
-                <a class="btn btn-warning" id="populateProblems">Confirm</a>
-              </form>
+                <a class="btn btn-warning" id="populateProblems">Populate Potential Problems</a>
+              </>
             </div>
             <h2>Transcript</h2>
             <div id="transcriptdiv" class="ScrollStyle"></div>
@@ -32,8 +36,13 @@
             <div class="featurepanelstyle">Problem</div>
             <div class="timeline">
               <div id="notes_timeline" class="timeline-outline"></div>
+              <div class="topnav" id="myTopnav">
+                <a href="#final" class="active" id="final">Final Chart</a>
+                <a href="#prepopulated" id="prepopulated">Prepopulated Chart</a>
             </div>
-            <div id="chartdiv"></div>
+            </div>
+              <div id="chartdiv"></div>
+              <div id="chartdiv1"></div>
           </div>
         </div>
         <div class="row">
@@ -48,10 +57,19 @@
               </thead>
               <tbody id="note-table"></tbody>
             </table>
+            <table class="table prepopulated-table">
+              <thead>
+                <th>Start</th>
+                <th>End</th>
+                <th>Percentage</th>
+                <th>Add</th>
+                <tbody id="prepopulated-table"></tbody>
+              </thead>
+            </table>
           </div>
           <div class="col-md-6 analysis" name="analysis">
             <form style="margin-left: 10px;">
-              <div class="form-inline">
+              <div class="form-inline" id="timeLine">
                 <span class="label">Start time (mm:ss): </span>
                 <input type="text" class="form-control" id="start" size="4">
                 <span class="label">End time (mm:ss): </span>

@@ -101,16 +101,6 @@ window.onload = function(){
     // ev.preventDefault();
     $('.participant-selection').addClass('hidden');
   });
-  $('#populateProblems').on('click', function (ev) {
-    // ev.preventDefault();
-   //document.write(pitchData)
-   //console.log(transcriptData[0])
-   //console.log(pitchData[0])
-   for (i in transcriptData){
-    console.log(transcriptData[i]);
-   }
-  });
-
   $.key('ctrl+shift+s', function() {
     let audioLog = JSON.stringify(logAudio);
     let jsonData = JSON.stringify(note_array);
@@ -122,7 +112,7 @@ window.onload = function(){
     let audioFile = 'audioLog_' + participant + '_' + task + '_' + Date.now() + '.json'
 
     download(jsonData, filename, 'text/plain');
-    download(audioLog, audioFile, 'text/plain');
+    //download(audioLog, audioFile, 'text/plain');
   });
 
   setTranscriptSelectionEventListener();
@@ -209,7 +199,7 @@ function parseData(dataset_url) {
       var temppitchData = inputdata[i].pitch;
       for(var j = 0; j < temppitchData.length; j++){
         var time = start + j * (end - start) / temppitchData.length;
-        pitchData.push({"time": time, "data":parseFloat(temppitchData[j]), "legendColor": AmCharts.randomColor, "label": "undefined"});
+        pitchData.push({"time": time, "data":parseFloat(temppitchData[j]),"legendColor": AmCharts.randomColor, "label": "undefined"});
       }
 
     }});
@@ -343,11 +333,6 @@ periodSelector: {
 });
 return chart;
 }
-
-function test(){
-    var x = document.getElementById("transcriptdiv");
-    x.innerHTML = "123";
-    }
 function drawTranscript(){
   // three data fields: start, end, label
   var transcript = "";
@@ -640,3 +625,85 @@ document.addEventListener('keydown', function(e) {
     }
   }
 });
+
+
+$('#prepopulated').on('click', function () {
+    $('#prepopulated').addClass('active');
+    $('#final').removeClass('active');
+    $('.note-table').hide();
+    $('.prepopulated-table').show();
+    $('#timeLine').hide();
+    $('#addNote').hide();
+});
+
+$('#final').on('click', function () {
+    $('#final').addClass('active');
+    $('#prepopulated').removeClass('active');
+    $('.note-table').show();
+    $('.prepopulated-table').hide();
+    $('#timeLine').show();
+    $('#addNote').show();
+});
+$('#populateProblems').on('click', function (ev) {
+
+    if(pitchData.length != 0 && transcriptData.length != 0)
+    {
+      console.log("data is ready...");
+      console.log(pitchData)
+      sampleData = pitchAnalyze();
+      startTime = sampleData[0].time;
+      endTime = sampleData[1].time;
+      percentage = sampleData[2];
+      id = uuidv4();
+      $('#prepopulated-table').append(
+            "<tr class=note_"+ id + "><td>" + startTime + '</td>' +
+            "<td>" + endTime + '</td>' +
+            "<td>" + percentage + '</td>' +
+            "<td><i class='fa fa-plus' aria-hidden='true'></i></tr>"
+    )
+    $('.note_' + id + '> td > i').on('click', function() {
+      new_id = uuidv4();
+      annotation = $('#annotation').val();
+      prob = $('#probDescription').val();
+      $('#note-table').append(
+      "<tr class=note_"+ new_id + "><td>" + startTime + '</td>' +
+      "<td>" + endTime + '</td>' +
+      "<td>" + prob + '</td>' +
+      "<td>" + annotation + '</td>' +
+      "<td><i class='fa fa-trash-o delete-note' aria-hidden='true'></i></tr>"
+    )
+    var_note = {endTime:endTime,annotation:annotation,startTime:startTime,prob:prob,id:new_id};
+    note_array.push(var_note);
+    $('.note_' + new_id + '> td > i').on('click', function() {
+      $('.note_' + new_id).remove();
+      _.remove(note_array, function (n) {
+        return n.id == new_id;
+      });
+    });
+    $('.note_' + id).remove();
+    $('#annotation').val("");
+    $('#probDescription').val("");
+    });
+    }
+    else {
+      setTimeout(myTimer, 500);
+    }
+});
+
+//This function has to be implemented that it will return all the period which has potental problems with percentage.
+//now it is filled with sample data
+//Also note that time has to be converted into mm:ss format
+function pitchAnalyze(){
+    var startTime = pitchData[0];
+    var endTime = pitchData[200]
+    var percentage = 100;
+    return [startTime,endTime,percentage]
+}
+
+//random id generator
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
