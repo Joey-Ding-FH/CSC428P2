@@ -17,6 +17,10 @@ var selectedStart, selectedEnd;
 window.onload = function(){
   Tipped.create('.legend-label')
 
+  $('#gender').append("<option value='0'>" + 'Male' + "</option>");
+  $('#gender').append("<option value='1'>" + 'Female' + "</option>");
+  $("#gender").val("");
+
   $.get('./data/participant_file.json', function (files) {
     participants_files = files;
     participants = _.map(files,'id');
@@ -158,6 +162,7 @@ function loadTaskData () {  //load the audio when the UI is displayed
     if(pitchData.length != 0 && transcriptData.length != 0)
     {
       console.log("data is ready...");
+      console.log(pitchData.length);
       mChart = drawCharts();
       drawTranscript();
     }
@@ -649,7 +654,8 @@ $('#populateProblems').on('click', function (ev) {
     if(pitchData.length != 0 && transcriptData.length != 0)
     {
       console.log("data is ready...");
-      console.log(pitchData)
+      console.log(pitchData);
+      console.log(pitchData.length);
       sampleData = pitchAnalyze();
       startTime = sampleData[0].time;
       endTime = sampleData[1].time;
@@ -690,14 +696,24 @@ $('#populateProblems').on('click', function (ev) {
     }
 });
 
+
 //This function has to be implemented that it will return all the period which has potental problems with percentage.
 //now it is filled with sample data
 //Also note that time has to be converted into mm:ss format
-function pitchAnalyze(){
-    var startTime = pitchData[0];
-    var endTime = pitchData[200]
-    var percentage = 100;
-    return [startTime,endTime,percentage]
+function pitchAnalyze(start_index, end_index){
+    let current_index = 0;
+    let potential_problems = [];
+    let gender = $('#gender').val()
+    let min = gender ? 165 : 85;
+    let max = gender ? 255 : 180;
+
+    let i;
+    for (i = start_index; i <= end_index; i++) {
+        if (pitchData[i].data <= min || pitchData[i].data >= max) {
+          return true;
+        }
+    }
+    return false;
 }
 
 //random id generator
