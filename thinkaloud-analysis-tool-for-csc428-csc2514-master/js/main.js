@@ -10,9 +10,20 @@ var timeline_start, timeline_end;
 var  pitchData = [], transcriptData = [];
 var segmentPlayStart;
 var logAudio = [];
+var dataset;
 //this variable is to mark whether the mouse select operation is executed so that it can be distinguished from click
 var selection = false;
 var selectedStart, selectedEnd;
+// Get this from Azzy later.
+var keywords = ['wondering',
+  'what is',
+  'how',
+  'why',
+  'could',
+  'should'
+];
+var interestAreas = [];
+
 
 window.onload = function(){
   Tipped.create('.legend-label')
@@ -193,6 +204,7 @@ function parseData(dataset_url) {
   var pitchData = [];
   AmCharts.loadFile(dataset_url, {}, function(data) {
     inputdata = AmCharts.parseJSON(data);
+    dataset = inputdata;
     for(var i = 0; i < inputdata.length; i++){
       var start = parseInt(parseFloat(inputdata[i].start_time) * 1000);
       var end = parseInt(parseFloat(inputdata[i].end_time) * 1000);
@@ -700,8 +712,49 @@ $('#populateProblems').on('click', function (ev) {
 //This function has to be implemented that it will return all the period which has potental problems with percentage.
 //now it is filled with sample data
 //Also note that time has to be converted into mm:ss format
-function pitchAnalyze(start_index, end_index){
-    let current_index = 0;
+function pitchAnalyze(){
+    let tindex;
+    let kindex;
+    for (tindex = 0; tindex < transcriptData.length; tindex++) {
+        let transcript = transcriptData[tindex];
+        for (kindex = 0; kindex < keywords.length; kindex++) {
+          let keyword = keywords[kindex];
+          if (transcript.label.toLowerCase().indexOf(keyword) !== -1) {
+            interestAreas.push(transcript);
+            break;
+          }
+        }
+    }
+
+    pitchAreas = {};
+    for (var index in dataset) {
+      var data = dataset[index];
+      var start = parseInt(parseFloat(data.start_time) * 1000);
+      var end = parseInt(parseFloat(data.end_time) * 1000);
+      var s_trans = interestAreas.filter( function(item) {return (item.start == start);} );
+      if (s_trans.length > 0) {
+          var label = s_trans[0].label;
+          pitchAreas[label] = [];
+          var temppitchData = data.pitch;
+          var startTime = start + 0 * (end - start) / temppitchData.length;
+          var endTime = start + (temppitchData.length - 1) * (end - start) / temppitchData.length;
+          var pitchStartIndex = pitchData.indexOf(pitchData.filter( function(item){return (item.time==startTime);} )[0]);
+          var pitchEndIndex = pitchData.indexOf(pitchData.filter( function(item){return (item.time==endTime);} )[0]);
+          pitchAreas[label].push([pitchStartIndex, pitchEndIndex]);
+      }
+    }
+
+    var keys = Object.keys(pitchAreas);
+    for (var key in keys) {
+        var message = keys[key];
+        if (!pitchInterestArea(pitchAreas[message][0], pitchAreas[message][1])) {
+            delete pitchAreas.message;
+        }
+    }
+    return pitchAreas
+}
+
+function pitchInterestArea(start_index, end_index) {
     let potential_problems = [];
     let gender = $('#gender').val()
     let min = gender ? 165 : 85;
