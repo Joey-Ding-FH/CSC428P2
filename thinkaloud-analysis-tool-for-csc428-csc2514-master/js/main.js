@@ -662,47 +662,53 @@ $('#final').on('click', function () {
     $('#addNote').show();
 });
 $('#populateProblems').on('click', function (ev) {
-
     if(pitchData.length != 0 && transcriptData.length != 0)
     {
-      console.log("data is ready...");
-      console.log(pitchData);
-      console.log(pitchData.length);
       sampleData = pitchAnalyze();
-      startTime = sampleData[0].time;
-      endTime = sampleData[1].time;
-      percentage = sampleData[2];
-      id = uuidv4();
-      $('#prepopulated-table').append(
-            "<tr class=note_"+ id + "><td>" + startTime + '</td>' +
-            "<td>" + endTime + '</td>' +
-            "<td>" + percentage + '</td>' +
-            "<td><i class='fa fa-plus' aria-hidden='true'></i></tr>"
-    )
-    $('.note_' + id + '> td > i').on('click', function() {
-      new_id = uuidv4();
-      annotation = $('#annotation').val();
-      prob = $('#probDescription').val();
-      $('#note-table').append(
-      "<tr class=note_"+ new_id + "><td>" + startTime + '</td>' +
-      "<td>" + endTime + '</td>' +
-      "<td>" + prob + '</td>' +
-      "<td>" + annotation + '</td>' +
-      "<td><i class='fa fa-trash-o delete-note' aria-hidden='true'></i></tr>"
-    )
-    var_note = {endTime:endTime,annotation:annotation,startTime:startTime,prob:prob,id:new_id};
-    note_array.push(var_note);
-    $('.note_' + new_id + '> td > i').on('click', function() {
-      $('.note_' + new_id).remove();
-      _.remove(note_array, function (n) {
-        return n.id == new_id;
-      });
-    });
-    $('.note_' + id).remove();
-    $('#annotation').val("");
-    $('#probDescription').val("");
-    });
-    }
+      for (key in sampleData){
+          startTime_Nconverted = sampleData[key][0][0];
+          endTime_Nconverted = sampleData[key][0][1];
+          var startInSecs = parseInt(startTime_Nconverted/1000);
+          var endInSecs = parseInt(endTime_Nconverted/1000);
+          var startMins = parseInt(startInSecs / 60);
+          var startSecs = startInSecs - startMins * 60;
+          var endMins = parseInt(endInSecs / 60);
+          var endSecs = endInSecs - endMins * 60;
+          startTime = startMins + ":" + startSecs;
+          endTime = endMins + ":" + endSecs;;
+          transcript = key;
+          id = uuidv4();
+          $('#prepopulated-table').append(
+                "<tr class=note_"+ id + "><td>" + startTime + '</td>' +
+                "<td>" + endTime + '</td>' +
+                "<td>" + transcript + '</td>' +
+                "<td><i class='fa fa-plus' aria-hidden='true'></i></tr>"
+        )
+        $('.note_' + id + '> td > i').on('click', function() {
+          new_id = uuidv4();
+          annotation = $('#annotation').val();
+          prob = $('#probDescription').val();
+          $('#note-table').append(
+          "<tr class=note_"+ new_id + "><td>" + startTime + '</td>' +
+          "<td>" + endTime + '</td>' +
+          "<td>" + prob + '</td>' +
+          "<td>" + annotation + '</td>' +
+          "<td><i class='fa fa-trash-o delete-note' aria-hidden='true'></i></tr>"
+        )
+        var_note = {endTime:endTime,annotation:annotation,startTime:startTime,prob:prob,id:new_id};
+        note_array.push(var_note);
+        $('.note_' + new_id + '> td > i').on('click', function() {
+          $('.note_' + new_id).remove();
+          _.remove(note_array, function (n) {
+            return n.id == new_id;
+          });
+        });
+        $('.note_' + id).remove();
+        $('#annotation').val("");
+        $('#probDescription').val("");
+        });
+      }
+     }
     else {
       setTimeout(myTimer, 500);
     }
